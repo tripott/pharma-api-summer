@@ -4,25 +4,56 @@ const db = new PouchDB(process.env.COUCHDB_URL + process.env.COUCHDB_NAME)
 const buildPrimaryKey = require('./lib/build-primary-key')
 const medPKGenerator = buildPrimaryKey('medication_')
 const patientPKGenerator = buildPrimaryKey('patient_')
-const { assoc } = require('ramda')
+const { assoc, pathOr } = require('ramda')
 const HTTPError = require('node-http-error')
 
 const dal = {
   getMed,
+  updateMed,
   getDoc,
   createDoc,
+  createPatient,
   createMed,
   listMeds,
   listPatients,
   listPharmacies
 }
 
+/////////////////////////
+//  MEDS
+/////////////////////////
+
+//CREATE a MED
 function createMed(med, callback) {
-  //TODO:  Fix the dangerous dot notation.
-  const pk = medPKGenerator(med.label)
+  const pk = medPKGenerator(pathOr('', ['label'], med))
   med = assoc('_id', pk, med)
   med = assoc('type', 'medication', med)
   createDoc(med, callback)
+}
+
+//Update a med
+
+function updateMed(med, callback) {
+  med = assoc('type', 'medication', med)
+  createDoc(med, callback)
+}
+
+function createPatient(patient, callback) {
+  const last = pathOr('', ['lastName'], patient)
+  const first = pathOr('', ['firstName'], patient)
+  const last4 = pathOr('', ['last4SSN'], patient)
+  const patientNumber = pathOr('', ['patientNumber'], patient)
+
+  const pk = patientPKGenerator(`${last} ${first} ${last4} ${patientNumber}`)
+  patient = assoc('_id', pk, patient)
+  patient = assoc('type', 'patient', patient)
+  // or use a compose
+  // patient = compose(
+  //   assoc('_id', pk),
+  //   assoc('type', 'patient')
+  // )(patient)
+
+  createDoc(patient, callback)
 }
 
 function getMed(medId, callback) {
@@ -31,7 +62,7 @@ function getMed(medId, callback) {
 
     doc.type === 'medication'
       ? callback(null, doc)
-      : callback(new HTTPError(400, 'id is not medication.'))
+      : callback(new HTTPError(400, 'id is not a medication.'))
   })
 }
 

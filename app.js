@@ -3,19 +3,22 @@ const express = require('express')
 const app = express()
 const port = process.env.PORT || 5555
 const dal = require('./dal.js')
-const { pathOr } = require('ramda')
+const { pathOr, keys } = require('ramda')
 const bodyParser = require('body-parser')
 const HTTPError = require('node-http-error')
 
 app.use(bodyParser.json())
 
-//list the Meds  using dal.listMeds(limit, cb function)
+/////////////////////////
+///  WELCOME
+////////////////////////
 app.get('/', (req, res, next) =>
   res
     .status(200)
     .send('Welcome to the Pharma API!  Try a call to GET /meds for starters.')
 )
 
+// CREATE
 app.post('/meds', function(req, res, next) {
   const med = pathOr(null, ['body'], req)
   console.log('req.body', med)
@@ -26,6 +29,7 @@ app.post('/meds', function(req, res, next) {
   })
 })
 
+// READ A MED
 app.get('/meds/:id', function(req, res, next) {
   console.log('req:', req)
   const medId = pathOr(null, ['params', 'id'], req)
@@ -44,11 +48,44 @@ app.get('/meds/:id', function(req, res, next) {
   }
 })
 
+// UPDATE a MED
+app.put('/meds/:id', function(req, res, next) {
+  const medId = pathOr(null, ['params', 'id'], req)
+  const body = pathOr(null, ['body'], req)
+  console.log('body', body)
+  if (!body || keys(body).length === 0)
+    return next(new HTTPError(400, 'Missing medication in request body.'))
+
+  dal.updateMed(body, function(err, response) {
+    if (err) return next(new HTTPError(err.status, err.message, err))
+    res.status(200).send(response)
+  })
+
+})
+
+// TODO:  DELETE a MED
+
+// LIST ALL THE MEDS
 app.get('/meds', function(req, res, next) {
   dal.listMeds(10, function(err, data) {
     if (err) return next(new HTTPError(err.status, err.message, err))
     res.status(200).send(data)
   })
+})
+
+////////////////////////////
+///   PATIENTS
+////////////////////////////
+app.post('/patients', function(req, res, next) {
+  const patient = pathOr(null, ['body'], req)
+  console.log('patient body:', patient)
+
+  patient
+    ? dal.createPatient(patient, function(err, result) {
+        if (err) return next(new HTTPError(err.status, err.message, err))
+        res.status(201).send(result)
+      })
+    : next(new HTTPError(400, 'Missing patient in request.'))
 })
 
 app.get('/patients', function(req, res, next) {

@@ -12,6 +12,7 @@ const dal = {
   updateMed,
   getDoc,
   createDoc,
+  deleteMed,
   createPatient,
   createMed,
   listMeds,
@@ -32,10 +33,27 @@ function createMed(med, callback) {
 }
 
 //Update a med
-
 function updateMed(med, callback) {
   med = assoc('type', 'medication', med)
   createDoc(med, callback)
+}
+
+function deleteMed(medId, callback) {
+  deleteDoc(medId, callback)
+}
+
+function deleteDoc(id, callback) {
+  db
+    .get(id)
+    .then(function(doc) {
+      return db.remove(doc)
+    })
+    .then(function(result) {
+      callback(null, result)
+    })
+    .catch(function(err) {
+      callback(err)
+    })
 }
 
 function createPatient(patient, callback) {

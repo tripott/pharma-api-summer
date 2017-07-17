@@ -6,6 +6,25 @@ const dal = require('./dal.js')
 const { pathOr, keys } = require('ramda')
 const bodyParser = require('body-parser')
 const HTTPError = require('node-http-error')
+const checkRequiredFields = require('./lib/check-required-fields')
+const checkMedReqFields = checkRequiredFields([
+  'label',
+  'ingredients',
+  'amount',
+  'unit',
+  'form'
+])
+const checkPatientReqFields = checkRequiredFields([
+  'firstName',
+  'lastName',
+  'patientNumber',
+  'last4SSN'
+])
+const checkPharmReqFields = checkRequiredFields([
+  'storeNumber',
+  'storeChainName',
+  'storeName'
+])
 
 app.use(bodyParser.json())
 
@@ -21,6 +40,18 @@ app.get('/', (req, res, next) =>
 // CREATE
 app.post('/meds', function(req, res, next) {
   const med = pathOr(null, ['body'], req)
+
+  const checkResults = checkMedReqFields(med)
+
+  if (checkResults.length > 0) {
+    return next(
+      new HTTPError(400, 'Missing required fields in the request body.', {
+        fields: checkResults,
+        foo: true
+      })
+    )
+  }
+
   console.log('req.body', med)
 
   dal.createMed(med, function(err, result) {
@@ -60,10 +91,17 @@ app.put('/meds/:id', function(req, res, next) {
     if (err) return next(new HTTPError(err.status, err.message, err))
     res.status(200).send(response)
   })
-
 })
 
-// TODO:  DELETE a MED
+// DELETE A MED
+app.delete('/meds/:id', function(req, res, next) {
+  const medId = pathOr(null, ['params', 'id'], req)
+
+  dal.deleteMed(medId, function(err, response) {
+    if (err) return next(new HTTPError(err.status, err.message, err))
+    res.status(200).send(response)
+  })
+})
 
 // LIST ALL THE MEDS
 app.get('/meds', function(req, res, next) {

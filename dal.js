@@ -5,6 +5,17 @@ const buildPrimaryKey = require('./lib/build-primary-key')
 const medPKGenerator = buildPrimaryKey('medication_')
 const patientPKGenerator = buildPrimaryKey('patient_')
 const { assoc } = require('ramda')
+const HTTPError = require('node-http-error')
+
+const dal = {
+  getMed,
+  getDoc,
+  createDoc,
+  createMed,
+  listMeds,
+  listPatients,
+  listPharmacies
+}
 
 function createMed(med, callback) {
   //TODO:  Fix the dangerous dot notation.
@@ -12,6 +23,29 @@ function createMed(med, callback) {
   med = assoc('_id', pk, med)
   med = assoc('type', 'medication', med)
   createDoc(med, callback)
+}
+
+function getMed(medId, callback) {
+  db.get(medId, function(err, doc) {
+    if (err) return callback(err)
+
+    doc.type === 'medication'
+      ? callback(null, doc)
+      : callback(new HTTPError(400, 'id is not medication.'))
+  })
+}
+
+function getDoc(id, callback) {
+  db.get(id, function(err, doc) {
+    if (err) return callback(err)
+    callback(null, doc)
+  })
+
+  // db.get(id).then(function(doc) {
+  //   return callback(null, doc)
+  // }).catch(function(err) {
+  //   return callback(err)
+  // })
 }
 
 function createDoc(doc, callback) {
@@ -65,14 +99,6 @@ function listPharmacies(limit, callback) {
 function find(query, cb) {
   console.log('query', JSON.stringify(query, null, 2))
   query ? db.find(query, cb) : cb(null, [])
-}
-
-const dal = {
-  createDoc,
-  createMed,
-  listMeds,
-  listPatients,
-  listPharmacies
 }
 
 module.exports = dal

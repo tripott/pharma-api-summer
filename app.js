@@ -21,10 +21,27 @@ app.post('/meds', function(req, res, next) {
   console.log('req.body', med)
 
   dal.createMed(med, function(err, result) {
-    //TODO:  Return a real error and set up error handling middleware
     if (err) return next(new HTTPError(err.status, err.message, err))
     res.status(201).send(result)
   })
+})
+
+app.get('/meds/:id', function(req, res, next) {
+  console.log('req:', req)
+  const medId = pathOr(null, ['params', 'id'], req)
+
+  if (medId) {
+    // get the data
+    dal.getMed(medId, function(err, doc) {
+      if (err) return next(new HTTPError(err.status, err.message, err))
+
+      //TODO: make sure the returned doc is medication. if not send error
+      res.status(200).send(doc)
+    })
+    // return the data to the client
+  } else {
+    return next(new HTTPError(400, 'Missing medication id in path.'))
+  }
 })
 
 app.get('/meds', function(req, res, next) {

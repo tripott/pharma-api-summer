@@ -4,7 +4,7 @@ const db = new PouchDB(process.env.COUCHDB_URL + process.env.COUCHDB_NAME)
 const buildPrimaryKey = require('./lib/build-primary-key')
 const medPKGenerator = buildPrimaryKey('medication_')
 const patientPKGenerator = buildPrimaryKey('patient_')
-const { assoc, pathOr } = require('ramda')
+const { assoc, pathOr, head, last, split, filter, contains } = require('ramda')
 const HTTPError = require('node-http-error')
 
 const dal = {
@@ -103,18 +103,50 @@ function createDoc(doc, callback) {
   db.put(doc).then(res => callback(null, res)).catch(err => callback(err))
 }
 
-function listMeds(limit, callback) {
-  find(
-    {
-      selector: {
-        type: 'medication'
-      }
-    },
-    function(err, data) {
+function listMeds(lastItem, medFilter, limit, callback) {
+  var query = {}
+  if (medFilter) {
+    const arrFilter = split(':', medFilter)
+    //arrFilter = ['form', 'syrup']
+    const filterField = head(arrFilter)
+    // filterField = 'form'
+    const filterValue = last(arrFilter)
+    // filterField = 'syrup'
+    const selectorValue = assoc(filterField, filterValue, {})
+
+    //selectorValue = {form: 'syrup'}
+    if (filterField === 'ingredients') {
+      const findIngredient = ingredient => meds =>
+        filter(med => contains(ingredient, med.ingredients), meds)
+
+      query = { selector: { _id: { $gte: null }, type: 'medication' }, limit }
+
+      find(query, function(err, data) {
+        if (err) return callback(err)
+        callback(null, findIngredient(filterValue)(data.docs))
+      })
+    } else {
+      query = { selector: selectorValue, limit }
+      find(query, function(err, data) {
+        if (err) return callback(err)
+        callback(null, data.docs)
+      })
+    }
+  } else if (lastItem) {
+    query = { selector: { _id: { $gt: lastItem }, type: 'medication' }, limit }
+    find(query, function(err, data) {
       if (err) return callback(err)
       callback(null, data.docs)
-    }
-  )
+    })
+  } else {
+    // 1st page of results
+    //  /meds?limit=5
+    query = { selector: { _id: { $gte: null }, type: 'medication' }, limit }
+    find(query, function(err, data) {
+      if (err) return callback(err)
+      callback(null, data.docs)
+    })
+  }
 }
 
 function listPatients(limit, callback) {

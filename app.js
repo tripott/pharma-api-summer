@@ -52,8 +52,6 @@ app.post('/meds', function(req, res, next) {
     )
   }
 
-  console.log('req.body', med)
-
   dal.createMed(med, function(err, result) {
     if (err) return next(new HTTPError(err.status, err.message, err))
     res.status(201).send(result)
@@ -105,7 +103,13 @@ app.delete('/meds/:id', function(req, res, next) {
 
 // LIST ALL THE MEDS
 app.get('/meds', function(req, res, next) {
-  dal.listMeds(10, function(err, data) {
+  // /meds?filter=form:syrup&limit=5
+
+  const filter = pathOr(null, ['query', 'filter'], req)
+  const limit = pathOr(50, ['query', 'limit'], req)
+  const lastItem = pathOr(null ,['query', 'lastItem'], req)
+
+  dal.listMeds(lastItem, filter, Number(limit), function(err, data) {
     if (err) return next(new HTTPError(err.status, err.message, err))
     res.status(200).send(data)
   })

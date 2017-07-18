@@ -11,3 +11,10 @@ db
   })
   .then(() => console.log("created Index on the 'type' property"))
   .catch(err => console.log(err))
+
+db
+  .createIndex({
+    index: { fields: ['form'] }
+  })
+  .then(() => console.log("created Index on the 'form' property"))
+  .catch(err => console.log(err))

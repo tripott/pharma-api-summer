@@ -58,12 +58,75 @@ const patients = [
     type: 'medication'
   },
   {
-    _id: 'medication_amlodipine_20mg_syrup',
-    label: 'Amlodipine 20mg syrup',
+    _id: 'medication_test_20mg_syrup',
+    label: 'test 20mg syrup',
     ingredients: ['Amlodipine', 'Aspirin'],
     amount: '20',
     unit: 'mg',
     form: 'syrup',
+    type: 'medication'
+  },
+  {
+    _id: 'medication_test_40mg_syrup',
+    label: 'test 40mg syrup',
+    ingredients: ['Amlodipine', 'Aspirin'],
+    amount: '40',
+    unit: 'mg',
+    form: 'syrup',
+    type: 'medication'
+  },
+  {
+    _id: 'medication_test_60mg_tablet',
+    label: 'test 60mg tablet',
+    ingredients: ['Amlodipine', 'Aspirin'],
+    amount: '60',
+    unit: 'mg',
+    form: 'tablet',
+    type: 'medication'
+  },
+  {
+    _id: 'medication_test_80mg_tablet',
+    label: 'test 80mg tablet',
+    ingredients: ['Amlodipine', 'Aspirin'],
+    amount: '80',
+    unit: 'mg',
+    form: 'tablet',
+    type: 'medication'
+  },
+  {
+    _id: 'medication_test_100mg_tablet',
+    label: 'test 100mg tablet',
+    ingredients: ['Amlodipine', 'Aspirin'],
+    amount: '100',
+    unit: 'mg',
+    form: 'tablet',
+    type: 'medication'
+  },
+  {
+    _id: 'medication_test_200mg_tablet',
+    label: 'test 200mg tablet',
+    ingredients: ['Amlodipine', 'Aspirin'],
+    amount: '200',
+    unit: 'mg',
+    form: 'tablet',
+    type: 'medication'
+  },
+  {
+    _id: 'medication_test_300mg_tablet',
+    label: 'test 300mg tablet',
+    ingredients: ['Amlodipine', 'Aspirin'],
+    amount: '300',
+    unit: 'mg',
+    form: 'tablet',
+    type: 'medication'
+  },
+  {
+    _id: 'medication_test_300mg_tablet',
+    label: 'test 400mg tablet',
+    ingredients: ['Amlodipine', 'Aspirin'],
+    amount: '400',
+    unit: 'mg',
+    form: 'tablet',
     type: 'medication'
   },
   {

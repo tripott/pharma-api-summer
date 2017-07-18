@@ -144,18 +144,42 @@ function listPatients(limit, callback) {
   )
 }
 
-function listPharmacies(limit, callback) {
-  find(
-    {
-      selector: {
-        type: 'pharmacy'
-      }
-    },
-    function(err, data) {
-      if (err) return callback(err)
-      callback(null, data.docs)
+function listPharmacies(filter, lastItem, limit, callback) {
+  var query = {}
+  if (filter) {
+    const arrFilter = split(':', filter)
+    const filterField = head(arrFilter)
+    const filterValue = last(arrFilter)
+
+    const selectorValue = assoc(filterField, filterValue, {})
+    // selectorValue = {storeNumber: 1004}
+    query = {
+      selector: selectorValue,
+      limit
     }
-  )
+  } else if (lastItem) {
+    // we need to grab the next page of documents
+    query = {
+      selector: {
+        _id: { $gt: lastItem },
+        type: 'pharmacy'
+      },
+      limit
+    }
+  } else {
+    query = {
+      selector: {
+        _id: { $gte: null },
+        type: 'pharmacy'
+      },
+      limit
+    }
+  }
+
+  find(query, function(err, data) {
+    if (err) return callback(err)
+    callback(null, data.docs)
+  })
 }
 
 function find(query, cb) {

@@ -107,7 +107,7 @@ app.get('/meds', function(req, res, next) {
 
   const filter = pathOr(null, ['query', 'filter'], req)
   const limit = pathOr(50, ['query', 'limit'], req)
-  const lastItem = pathOr(null ,['query', 'lastItem'], req)
+  const lastItem = pathOr(null, ['query', 'lastItem'], req)
 
   dal.listMeds(lastItem, filter, Number(limit), function(err, data) {
     if (err) return next(new HTTPError(err.status, err.message, err))
@@ -138,7 +138,11 @@ app.get('/patients', function(req, res, next) {
 })
 
 app.get('/pharmacies', function(req, res, next) {
-  dal.listPharmacies(10, function(err, data) {
+  const limit = pathOr(10, ['query', 'limit'], req)
+  const lastItem = pathOr(null, ['query', 'lastItem'], req)
+  const filter = pathOr(null, ['query', 'filter'], req)
+
+  dal.listPharmacies(filter, lastItem, Number(limit), function(err, data) {
     if (err) return next(new HTTPError(err.status, err.message, err))
     res.status(200).send(data)
   })

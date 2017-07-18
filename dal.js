@@ -115,38 +115,19 @@ function listMeds(lastItem, medFilter, limit, callback) {
     const selectorValue = assoc(filterField, filterValue, {})
 
     //selectorValue = {form: 'syrup'}
-    if (filterField === 'ingredients') {
-      const findIngredient = ingredient => meds =>
-        filter(med => contains(ingredient, med.ingredients), meds)
-
-      query = { selector: { _id: { $gte: null }, type: 'medication' }, limit }
-
-      find(query, function(err, data) {
-        if (err) return callback(err)
-        callback(null, findIngredient(filterValue)(data.docs))
-      })
-    } else {
-      query = { selector: selectorValue, limit }
-      find(query, function(err, data) {
-        if (err) return callback(err)
-        callback(null, data.docs)
-      })
-    }
+    query = { selector: selectorValue, limit }
   } else if (lastItem) {
     query = { selector: { _id: { $gt: lastItem }, type: 'medication' }, limit }
-    find(query, function(err, data) {
-      if (err) return callback(err)
-      callback(null, data.docs)
-    })
   } else {
     // 1st page of results
     //  /meds?limit=5
     query = { selector: { _id: { $gte: null }, type: 'medication' }, limit }
-    find(query, function(err, data) {
-      if (err) return callback(err)
-      callback(null, data.docs)
-    })
   }
+
+  find(query, function(err, data) {
+    if (err) return callback(err)
+    callback(null, data.docs)
+  })
 }
 
 function listPatients(limit, callback) {
